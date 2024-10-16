@@ -11,4 +11,4 @@ WORKDIR /app
 COPY . .
 
 # Command to run your application
-CMD ["python", "entry.py"]
+CMD ["python", "code/entry.py"]

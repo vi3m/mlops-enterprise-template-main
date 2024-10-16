@@ -33,17 +33,17 @@ jobs:
       run: |
         pip install -r requirements.txt
 
-    - name: Lint entry.py
+    - name: Lint
       run: |
-        pylint entry.py
+        pylint code/entry.py
 
-    - name: Format entry.py
+    - name: Format
       run: |
-        black entry.py
+        black code/entry.py
 
     - name: Run unit tests
       run: |
-        pytest tests/test_entry.py
+        pytest -v tests
 
     - name: Measure code coverage
       run: |

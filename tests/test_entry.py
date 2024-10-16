@@ -1,5 +1,5 @@
 import pytest
-from entry import add
+from src.entry import add
 
 
 def test_add():
