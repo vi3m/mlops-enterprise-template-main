@@ -35,11 +35,11 @@ jobs:
 
     - name: Lint
       run: |
-        pylint code/entry.py
+        pylint src/entry.py
 
     - name: Format
       run: |
-        black code/entry.py
+        black src/entry.py
 
     - name: Run unit tests
       run: |
