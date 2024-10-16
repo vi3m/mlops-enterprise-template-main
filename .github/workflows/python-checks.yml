@@ -1,0 +1,59 @@
+name: Python MLOps Pipeline
+
+on:
+  push:
+    branches:
+    - main
+    paths:
+    - '.github/workflows/python-checks.yml'
+    - 'code/**'
+    - 'entry.py'
+  pull_request:
+    branches:
+    - main
+    paths:
+    - '.github/workflows/python-checks.yml'
+    - 'code/**'
+    - 'entry.py'
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+
+    - name: Lint entry.py
+      uses: pylint-action@v2
+      with:
+        args: --files entry.py
+
+    - name: Format entry.py
+      uses: black-action@v2
+      with:
+        args: --files entry.py
+
+    - name: Run unit tests on entry.py
+      uses: pytest-action@v2
+      with:
+        args: --files entry.py
+    - name: Measure code coverage on entry.py
+      uses: coverage-action@v2
+      with:
+        args: --files entry.py
+
+    - name: Check type annotations on entry.py
+      uses: mypy-action@v2
+      with:
+        args: --files entry.py
+
+    - name: Security scan on entry.py
+      uses: bandit-action@v2
+      with:
+        args: --files entry.py
+
+    - name: Report code coverage
+      uses: codecov-action@v2
