@@ -1,10 +1,12 @@
 name: Build and Push Docker Image
 
 on:
-  workflow_run:
-    workflows: ["Python MLOps Pipeline"]
-    types:
-    - completed
+  push:
+    branches:
+    - main
+  pull_request:
+    branches:
+    - main
 
 jobs:
   checks:
