@@ -30,6 +30,6 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: |
-            ${{ secrets.AZURE_REGISTRY_URL }}.azurecr.io/mlops-gitact-run:latest
-            ${{ secrets.AZURE_REGISTRY_URL }}.azurecr.io/mlops-gitact-run:${{ github.sha }}
-            ${{ secrets.AZURE_REGISTRY_URL }}.azurecr.io/mlops-gitact-run:${{ github.run_number }}
+            ${{ secrets.AZURE_REGISTRY_URL }}/mlops-gitact-run:latest
+            ${{ secrets.AZURE_REGISTRY_URL }}/mlops-gitact-run:${{ github.sha }}
+            ${{ secrets.AZURE_REGISTRY_URL }}/mlops-gitact-run:${{ github.run_number }}
