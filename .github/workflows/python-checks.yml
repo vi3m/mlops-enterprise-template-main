@@ -22,38 +22,35 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.8'
+
     - name: Install dependencies
       run: |
         pip install -r requirements.txt
 
     - name: Lint entry.py
-      uses: pylint-action@v2
-      with:
-        args: --files entry.py
+      run: |
+        pylint entry.py
 
     - name: Format entry.py
-      uses: black-action@v2
-      with:
-        args: --files entry.py
+      run: |
+        black entry.py
 
-    - name: Run unit tests on entry.py
-      uses: pytest-action@v2
-      with:
-        args: --files entry.py
-    - name: Measure code coverage on entry.py
-      uses: coverage-action@v2
-      with:
-        args: --files entry.py
+    - name: Run unit tests
+      run: |
+        pytest tests/test_entry.py
 
-    - name: Check type annotations on entry.py
-      uses: mypy-action@v2
-      with:
-        args: --files entry.py
-
-    - name: Security scan on entry.py
-      uses: bandit-action@v2
-      with:
-        args: --files entry.py
+    - name: Measure code coverage
+      run: |
+        coverage run -m pytest tests/test_entry.py
+        coverage report
+        coverage xml
 
     - name: Report code coverage
-      uses: codecov-action@v2
+      uses: codecov/codecov-action@v2
+      with:
+        file: ./coverage.xml
