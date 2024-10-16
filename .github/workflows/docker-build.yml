@@ -29,4 +29,7 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ secrets.AZURE_REGISTRY_URL }}/mlops-learn:latest  # Adjust the image name as needed
+          tags: |
+            <your-acr-name>.azurecr.io/mlops-gitact-run:latest
+            <your-acr-name>.azurecr.io/mlops-gitact-run:${{ github.sha }}
+            <your-acr-name>.azurecr.io/mlops-gitact-run:${{ github.run_number }}
