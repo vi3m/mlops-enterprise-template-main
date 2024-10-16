@@ -1,6 +1,7 @@
 name: Model deployment
 
 on:
+  # This just means, Azure has control over this deployment. Need to add PAT tokens for this to work
   repository_dispatch:
     types: [machinelearningservices-runcompleted]
 

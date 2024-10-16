@@ -1,12 +1,14 @@
-name: Infra Deployment and Training
+name: Infra Training
 
 on:
-  push:
-    paths: 
-      - '.github/workflows/train_model.yml' 
-      - 'code/**' 
-  repository_dispatch:
-   types: [storage-blobcreated, storage-blobdeleted]
+  workflow_dispatch:
+  # commenting this out since we do not want to deploy trainings yet
+  # push:
+  #   paths: 
+  #     - '.github/workflows/train_model.yml' 
+  #     - 'code/**' 
+  # repository_dispatch:
+  #  types: [storage-blobcreated, storage-blobdeleted]
 
 jobs:
   deployment:
