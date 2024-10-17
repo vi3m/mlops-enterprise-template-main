@@ -1,11 +1,11 @@
 name: Mock Infra Creation
 
 on:
-  # workflow_dispatch
+  workflow_dispatch
   # updated to only trigger manually since its Free Tier subscription
-  push:
-    paths: 
-      - '.github/workflows/setup.yml'
+  # push:
+  #   paths: 
+  #     - '.github/workflows/setup.yml'
  
  
 # CONFIGURATION 
@@ -40,13 +40,13 @@ jobs:
         echo azure logged in
     # Deploys Azure resources 
     # commented for now since this is Free Tier
-    # - name: Deploy Azure resources
-    #   uses: azure/CLI@v1
-    #   with:
-    #     azcliversion: latest
-    #     inlineScript: |
-    #       az deployment group create \
-    #         --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
-    #         --template-file $GITHUB_WORKSPACE/infra/deploy.core-infra.json \
-    #         --parameters $GITHUB_WORKSPACE/infra/params.deploy.core-infra.json \
-    #         patToken=${{secrets.PATTOKEN}} repo_name=$GITHUB_REPOSITORY DataLakestorageName=${{ env.STORAGE_ACCOUNT }}
+    - name: Deploy Azure resources
+      uses: azure/CLI@v1
+      with:
+        azcliversion: latest
+        inlineScript: |
+          az deployment group create \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --template-file $GITHUB_WORKSPACE/infra/deploy.core-infra.json \
+            --parameters $GITHUB_WORKSPACE/infra/params.deploy.core-infra.json \
+            patToken=${{secrets.PATTOKEN}} repo_name=$GITHUB_REPOSITORY DataLakestorageName=${{ env.STORAGE_ACCOUNT }}
