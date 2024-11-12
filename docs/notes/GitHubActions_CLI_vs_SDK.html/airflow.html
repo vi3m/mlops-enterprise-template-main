@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Airflow and Docker Integration</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+            <p>Let's dive deeper into how Airflow works with Docker containers and how environment variables can drive the execution.</p>
+<h2 id="airflow-and-docker-integration">Airflow and Docker Integration</h2>
+<p>Airflow provides a DockerOperator that allows you to run tasks within Docker containers. Here's a simplified overview of the process:</p>
+<ul>
+<li>Airflow creates a Docker container from a specified image.</li>
+<li>Airflow sets environment variables within the container.</li>
+<li>Airflow runs the container, executing the command specified in the DockerOperator.</li>
+<li>The container executes the task, and Airflow monitors its progress.</li>
+<li>Upon completion, Airflow retrieves the container's logs and updates the task's status.</li>
+</ul>
+<h2 id="using-environment-variables-to-drive-execution">Using Environment Variables to Drive Execution</h2>
+<p>Environment variables can be used to:
+Pass parameters to the container.
+Configure the container's behavior.
+Determine which code function to run.
+Here are some examples:</p>
+<h3 id="example-1-passing-parameters">Example 1: Passing Parameters</h3>
+<p><a href="http://dag.py">dag.py</a>:
+Python</p>
+<pre><code class="language-python"><span class="hljs-keyword">from</span> airflow <span class="hljs-keyword">import</span> DAG
+<span class="hljs-keyword">from</span> airflow.operators.docker_operator <span class="hljs-keyword">import</span> DockerOperator
+
+default_args = {
+    <span class="hljs-string">&#x27;environment_variables&#x27;</span>: [
+        {<span class="hljs-string">&quot;name&quot;</span>: <span class="hljs-string">&quot;NAME&quot;</span>, <span class="hljs-string">&quot;value&quot;</span>: <span class="hljs-string">&quot;John&quot;</span>},
+        {<span class="hljs-string">&quot;name&quot;</span>: <span class="hljs-string">&quot;AGE&quot;</span>, <span class="hljs-string">&quot;value&quot;</span>: <span class="hljs-string">&quot;30&quot;</span>},
+    ]
+}
+
+dag = DAG(
+    <span class="hljs-string">&#x27;example_dag&#x27;</span>,
+    default_args=default_args,
+    schedule_interval=<span class="hljs-literal">None</span>,
+)
+
+task = DockerOperator(
+    task_id=<span class="hljs-string">&#x27;print_name&#x27;</span>,
+    image=<span class="hljs-string">&#x27;python:3.9-slim&#x27;</span>,
+    command=<span class="hljs-string">&#x27;python -c &quot;import os; print(f\&#x27;Hello, {os.environ[\&#x27;NAME\&#x27;]}! You are {os.environ[\&#x27;AGE\&#x27;]} years old.\&#x27;)&quot;&#x27;</span>,
+    dag=dag,
+)
+</code></pre>
+<p>In this example, the NAME and AGE environment variables are passed to the container and used in the Python script.</p>
+<h3 id="example-2-configuring-behavior">Example 2: Configuring Behavior</h3>
+<p><a href="http://dag.py">dag.py</a>:
+Python</p>
+<pre><code class="language-python"><span class="hljs-keyword">from</span> airflow <span class="hljs-keyword">import</span> DAG
+<span class="hljs-keyword">from</span> airflow.operators.docker_operator <span class="hljs-keyword">import</span> DockerOperator
+
+default_args = {
+    <span class="hljs-string">&#x27;environment_variables&#x27;</span>: [
+        {<span class="hljs-string">&quot;name&quot;</span>: <span class="hljs-string">&quot;LOG_LEVEL&quot;</span>, <span class="hljs-string">&quot;value&quot;</span>: <span class="hljs-string">&quot;DEBUG&quot;</span>},
+    ]
+}
+
+dag = DAG(
+    <span class="hljs-string">&#x27;example_dag&#x27;</span>,
+    default_args=default_args,
+    schedule_interval=<span class="hljs-literal">None</span>,
+)
+
+task = DockerOperator(
+    task_id=<span class="hljs-string">&#x27;run_app&#x27;</span>,
+    image=<span class="hljs-string">&#x27;my-app:latest&#x27;</span>,
+    command=<span class="hljs-string">&#x27;python app.py&#x27;</span>,
+    dag=dag,
+)
+</code></pre>
+<p>In this example, the LOG_LEVEL environment variable configures the logging level for the <a href="http://app.py">app.py</a> script.</p>
+<h3 id="example-3-driving-code-execution">Example 3: Driving Code Execution</h3>
+<p><a href="http://dag.py">dag.py</a>:
+Python</p>
+<pre><code class="language-python"><span class="hljs-keyword">from</span> airflow <span class="hljs-keyword">import</span> DAG
+<span class="hljs-keyword">from</span> airflow.operators.docker_operator <span class="hljs-keyword">import</span> DockerOperator
+
+default_args = {
+    <span class="hljs-string">&#x27;environment_variables&#x27;</span>: [
+        {<span class="hljs-string">&quot;name&quot;</span>: <span class="hljs-string">&quot;FUNCTION_TO_RUN&quot;</span>, <span class="hljs-string">&quot;value&quot;</span>: <span class="hljs-string">&quot;process_data&quot;</span>},
+    ]
+}
+
+dag = DAG(
+    <span class="hljs-string">&#x27;example_dag&#x27;</span>,
+    default_args=default_args,
+    schedule_interval=<span class="hljs-literal">None</span>,
+)
+
+task = DockerOperator(
+    task_id=<span class="hljs-string">&#x27;run_function&#x27;</span>,
+    image=<span class="hljs-string">&#x27;my-app:latest&#x27;</span>,
+    command=<span class="hljs-string">&#x27;python runner.py&#x27;</span>,
+    dag=dag,
+)
+</code></pre>
+<p><a href="http://runner.py">runner.py</a>:
+Python</p>
+<pre><code class="language-python"><span class="hljs-keyword">import</span> os
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">process_data</span>():
+    <span class="hljs-comment"># Process data logic</span>
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;Processing data...&quot;</span>)
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">send_notification</span>():
+    <span class="hljs-comment"># Send notification logic</span>
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;Sending notification...&quot;</span>)
+
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">&quot;__main__&quot;</span>:
+    function_to_run = os.environ[<span class="hljs-string">&quot;FUNCTION_TO_RUN&quot;</span>]
+    <span class="hljs-built_in">globals</span>()[function_to_run]()
+</code></pre>
+<p>In this example, the FUNCTION_TO_RUN environment variable determines which function to execute in the <a href="http://runner.py">runner.py</a> script.</p>
+<h3 id="using-dummy_key-to-drive-execution">Using dummy_key to Drive Execution</h3>
+<p>Based on your original code snippet, you can modify the <a href="http://runner.py">runner.py</a> script to use the dummy_key environment variable:
+<a href="http://runner.py">runner.py</a>:
+Python</p>
+<pre><code class="language-python"><span class="hljs-keyword">import</span> os
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">function1</span>():
+    <span class="hljs-comment"># Function 1 logic</span>
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;Running function 1...&quot;</span>)
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">function2</span>():
+    <span class="hljs-comment"># Function 2 logic</span>
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;Running function 2...&quot;</span>)
+
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">&quot;__main__&quot;</span>:
+    dummy_key = os.environ[<span class="hljs-string">&quot;dummy_key&quot;</span>]
+    <span class="hljs-keyword">if</span> dummy_key == <span class="hljs-string">&quot;value1&quot;</span>:
+        function1()
+    <span class="hljs-keyword">elif</span> dummy_key == <span class="hljs-string">&quot;value2&quot;</span>:
+        function2()
+</code></pre>
+<p><a href="http://dag.py">dag.py</a>:
+Python</p>
+<pre><code class="language-python"><span class="hljs-keyword">from</span> airflow <span class="hljs-keyword">import</span> DAG
+<span class="hljs-keyword">from</span> airflow.operators.docker_operator <span class="hljs-keyword">import</span> DockerOperator
+
+default_args = {
+    <span class="hljs-string">&#x27;environment_variables&#x27;</span>: [
+        {<span class="hljs-string">&quot;name&quot;</span>: <span class="hljs-string">&quot;dummy_key&quot;</span>, <span class="hljs-string">&quot;value&quot;</span>: <span class="hljs-string">&quot;value1&quot;</span>},
+    ]
+}
+
+dag = DAG(
+    <span class="hljs-string">&#x27;example_dag&#x27;</span>,
+    default_args=default_args,
+    schedule_interval=<span class="hljs-literal">None</span>,
+)
+
+task = DockerOperator(
+    task_id=<span class="hljs-string">&#x27;run_function&#x27;</span>,
+    image=<span class="hljs-string">&#x27;my-app:latest&#x27;</span>,
+    command=<span class="hljs-string">&#x27;python runner.py&#x27;</span>,
+    dag=dag,
+)
+</code></pre>
+<p>In this example, the dummy_key environment variable determines which function to execute in the <a href="http://runner.py">runner.py</a> script.
+I hope these examples help you understand how Airflow works with Docker containers and how environment variables can drive the execution!</p>
+<h1 id="more-details">More Details</h1>
+<p>Certainly! Let’s explore how Apache Airflow works with Docker containers and how environment variables can influence the execution of tasks within a DAG.</p>
+<h3 id="overview-of-airflow-with-docker">Overview of Airflow with Docker</h3>
+<ol>
+<li>
+<p><strong>Airflow DAGs</strong>: Airflow uses Directed Acyclic Graphs (DAGs) to represent workflows. Each task in a DAG can be a Python function, an external script, or a command that runs in a container.</p>
+</li>
+<li>
+<p><strong>Docker Operator</strong>: Airflow provides the <code>DockerOperator</code>, which allows you to run tasks in Docker containers. This means that each task can have its own environment and dependencies.</p>
+</li>
+</ol>
+<h3 id="using-environment-variables">Using Environment Variables</h3>
+<p>Environment variables can determine which function or logic to execute in a container. Here’s a simple example to illustrate this.</p>
+<h3 id="example-dag">Example DAG</h3>
+<pre><code class="language-python"><span class="hljs-keyword">from</span> airflow <span class="hljs-keyword">import</span> DAG
+<span class="hljs-keyword">from</span> airflow.providers.docker.operators.docker <span class="hljs-keyword">import</span> DockerOperator
+<span class="hljs-keyword">from</span> datetime <span class="hljs-keyword">import</span> datetime
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">determine_function</span>(<span class="hljs-params">dummy_key</span>):
+    <span class="hljs-keyword">if</span> dummy_key == <span class="hljs-string">&quot;function_a&quot;</span>:
+        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;Running Function A&quot;</span>
+    <span class="hljs-keyword">elif</span> dummy_key == <span class="hljs-string">&quot;function_b&quot;</span>:
+        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;Running Function B&quot;</span>
+    <span class="hljs-keyword">else</span>:
+        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;Unknown function&quot;</span>
+
+default_args = {
+    <span class="hljs-string">&#x27;start_date&#x27;</span>: datetime(<span class="hljs-number">2023</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>),
+}
+
+<span class="hljs-keyword">with</span> DAG(dag_id=<span class="hljs-string">&#x27;example_dag&#x27;</span>, default_args=default_args, schedule_interval=<span class="hljs-string">&#x27;@daily&#x27;</span>) <span class="hljs-keyword">as</span> dag:
+    
+    run_function = DockerOperator(
+        task_id=<span class="hljs-string">&#x27;run_function&#x27;</span>,
+        image=<span class="hljs-string">&#x27;my_docker_image:latest&#x27;</span>,
+        command=<span class="hljs-string">&#x27;python -c &quot;from my_module import determine_function; print(determine_function(\&#x27;{{ dag_run.conf.get(\&#x27;dummy_key\&#x27;, \&#x27;default\&#x27;) }}\&#x27;))&quot;&#x27;</span>,
+        environment_variables=[
+            {<span class="hljs-string">&quot;name&quot;</span>: <span class="hljs-string">&quot;DUMMY_KEY&quot;</span>, <span class="hljs-string">&quot;value&quot;</span>: <span class="hljs-string">&quot;{{ dag_run.conf.get(&#x27;dummy_key&#x27;, &#x27;default&#x27;) }}&quot;</span>}
+        ],
+        auto_remove=<span class="hljs-literal">True</span>,
+        dag=dag,
+    )
+</code></pre>
+<h3 id="explanation">Explanation</h3>
+<ol>
+<li>
+<p><strong>DAG Definition</strong>: The DAG is defined with a daily schedule.</p>
+</li>
+<li>
+<p><strong>DockerOperator</strong>:</p>
+<ul>
+<li><strong>Image</strong>: Specifies the Docker image to use.</li>
+<li><strong>Command</strong>: This runs a Python command within the container. It imports a function and calls it based on the value of an environment variable (<code>DUMMY_KEY</code>).</li>
+</ul>
+</li>
+<li>
+<p><strong>Environment Variables</strong>:</p>
+<ul>
+<li>The <code>DUMMY_KEY</code> variable is set using a Jinja template that allows you to pass in a value when triggering the DAG. The default value is <code>'default'</code>.</li>
+</ul>
+</li>
+</ol>
+<h3 id="triggering-the-dag">Triggering the DAG</h3>
+<p>You can trigger this DAG manually (e.g., via the Airflow UI or CLI) and provide a configuration:</p>
+<pre><code class="language-bash">airflow dags trigger -c <span class="hljs-string">&#x27;{&quot;dummy_key&quot;: &quot;function_a&quot;}&#x27;</span> example_dag
+</code></pre>
+<h3 id="output">Output</h3>
+<ul>
+<li>If <code>dummy_key</code> is set to <code>&quot;function_a&quot;</code>, the container will execute <code>determine_function</code> and print <code>&quot;Running Function A&quot;</code>.</li>
+<li>If set to <code>&quot;function_b&quot;</code>, it will print <code>&quot;Running Function B&quot;</code>.</li>
+<li>If the key is unknown or not provided, it defaults to <code>&quot;Unknown function&quot;</code>.</li>
+</ul>
+<h3 id="conclusion">Conclusion</h3>
+<p>In this example, the use of environment variables within a Docker container allows dynamic control over the task’s execution. You can easily adapt your workflow based on input parameters, making it flexible and powerful for various use cases.</p>
+
+            
+            
+        </body>
+        </html>
