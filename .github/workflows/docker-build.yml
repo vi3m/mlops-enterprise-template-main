@@ -1,16 +1,18 @@
 name: Build and Push Docker Image
 
+# Works on Pull Request Raised to main branch
 on:
   pull_request:
     branches:
     - main
 
 jobs:
+  # First it executes steps from python-checks.yml
   checks:
     uses: ./.github/workflows/python-checks.yml
   build:
-    needs: checks
-    if: ${{ needs.checks.result == 'success' }}
+    needs: checks # should run 'checks' before running this build
+    if: ${{ needs.checks.result == 'success' }} # py checks should be success
     runs-on: ubuntu-latest
 
     steps:
